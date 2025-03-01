@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Fieldd Extension",
+  "version": "1.0",
+  "description": "A simple Chrome extension to receive input from a user.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://admin.fieldd.co/*"],
+      "js": ["src/content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html"
+  }
+}

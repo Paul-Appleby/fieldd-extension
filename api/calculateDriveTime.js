@@ -14,10 +14,12 @@ const corsMiddleware = cors({
 // Short-term rate limiting (per 15 minutes)
 const shortTermLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // Temporarily increased for testing
+    max: 30, // 30 requests per 15 minutes (2 per minute average)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     message: {
         error: 'rate_limit_exceeded',
-        message: 'Too many requests in 15 minutes, please try again later.',
+        message: 'Please wait a few minutes before making more requests.',
         retryAfter: 15 * 60 // 15 minutes in seconds
     }
 });
@@ -25,7 +27,9 @@ const shortTermLimiter = rateLimit({
 // Daily rate limiting (stays within Google's free tier)
 const dailyLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    max: 1000, // Temporarily increased for testing
+    max: 100, // Limit each IP to 100 requests per day (Google's free tier limit)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     message: {
         error: 'daily_limit_reached',
         message: 'You have reached the daily limit of 100 free requests. Please try again tomorrow.',
@@ -46,28 +50,29 @@ export default async function handler(req, res) {
             });
         }
 
-        // Temporarily skip rate limiting for testing
-        /*
+        // Apply short-term rate limiting
         try {
             await shortTermLimiter(req, res);
         } catch (error) {
+            console.log(`Rate limit exceeded - IP: ${req.headers['x-forwarded-for'] || req.socket.remoteAddress}`);
             return res.status(429).json({
                 error: 'rate_limit_exceeded',
-                message: 'Too many requests in 15 minutes, please try again later.',
+                message: 'Please wait a few minutes before making more requests.',
                 retryAfter: 15 * 60
             });
         }
 
+        // Apply daily rate limiting
         try {
             await dailyLimiter(req, res);
         } catch (error) {
+            console.log(`Daily limit reached - IP: ${req.headers['x-forwarded-for'] || req.socket.remoteAddress}`);
             return res.status(429).json({ 
                 error: 'daily_limit_reached',
                 message: 'You have reached the daily limit of 100 free requests. Please try again tomorrow.',
                 retryAfter: 24 * 60 * 60
             });
         }
-        */
 
         const { origin, destination } = req.body;
         

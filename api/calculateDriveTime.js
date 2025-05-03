@@ -1,4 +1,3 @@
-import { rateLimit } from 'express-rate-limit';
 import cors from 'cors';
 
 // CORS configuration
@@ -10,9 +9,6 @@ const corsMiddleware = cors({
     methods: ['POST'],
     allowedHeaders: ['Content-Type']
 });
-
-// Track usage in memory (in production, use a database)
-const usageTracker = new Map();
 
 export default async function handler(req, res) {
     // Apply CORS
@@ -33,13 +29,6 @@ export default async function handler(req, res) {
             });
         }
 
-        // Track usage
-        const today = new Date().toDateString();
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        const key = `${ip}-${today}`;
-        const currentUsage = usageTracker.get(key) || 0;
-        usageTracker.set(key, currentUsage + 1);
-
         try {
             const MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
             const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${MAPS_API_KEY}`;
@@ -47,8 +36,8 @@ export default async function handler(req, res) {
             const response = await fetch(url);
             const data = await response.json();
             
-            // Log usage for monitoring
-            console.log(`API call made - IP: ${ip}, Usage today: ${currentUsage + 1}, Origin: ${origin}, Destination: ${destination}`);
+            // Log the request for monitoring
+            console.log(`API call made - Origin: ${origin}, Destination: ${destination}`);
             
             res.status(200).json(data);
         } catch (error) {

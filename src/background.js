@@ -1,13 +1,35 @@
-// Listen for the installation event
-chrome.runtime.onInstalled.addListener(() => {
-    console.log('Fieldd Extension installed');
-});
-
-// Example of listening for a message
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('Background script received a message:', message);
-    if (message.action === 'logMessage') {
-        console.log('Message from content script:', message.data);
-        sendResponse({ status: 'Message received' });
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'calculateDriveTime') {
+        const API_ENDPOINT = "https://your-project.vercel.app/api/calculateDriveTime";
+        
+        fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                origin: request.origin,
+                destination: request.destination
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            sendResponse({
+                success: true,
+                data: data
+            });
+        })
+        .catch(error => {
+            sendResponse({
+                success: false,
+                error: error.message
+            });
+        });
+        
+        return true; // Required for async response
+    }
+    if (request.action === 'ping') {
+        sendResponse({ success: true });
+        return true;
     }
 });

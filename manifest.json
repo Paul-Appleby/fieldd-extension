@@ -19,5 +19,13 @@
   ],
   "action": {
     "default_popup": "src/popup/popup.html"
+  },
+  "host_permissions": [
+    "https://maps.googleapis.com/*",
+    "https://*.vercel.app/*"
+  ],
+  "content_security_policy": {
+    "script-src": "'self' https://maps.googleapis.com https://*.vercel.app;",
+    "object-src": "'self'"
   }
 }

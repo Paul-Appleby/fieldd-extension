@@ -1,0 +1,19 @@
+.job-counter {
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.job-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Style for when max jobs are selected */
+.max-jobs-reached {
+  opacity: 0.5;
+  pointer-events: none;
+} 

@@ -14,15 +14,23 @@ const corsMiddleware = cors({
 // Short-term rate limiting (per 15 minutes)
 const shortTermLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 25, // Limit each IP to 25 requests per 15 minutes
-    message: 'Too many requests in 15 minutes, please try again later.'
+    max: 50, // Increased to 50 requests per 15 minutes
+    message: {
+        error: 'rate_limit_exceeded',
+        message: 'Too many requests in 15 minutes, please try again later.',
+        retryAfter: 15 * 60 // 15 minutes in seconds
+    }
 });
 
 // Daily rate limiting (stays within Google's free tier)
 const dailyLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
     max: 100, // Limit each IP to 100 requests per day (Google's free tier limit)
-    message: 'Daily free limit reached (100 requests). Please try again tomorrow.'
+    message: {
+        error: 'daily_limit_reached',
+        message: 'You have reached the daily limit of 100 free requests. Please try again tomorrow.',
+        retryAfter: 24 * 60 * 60 // 24 hours in seconds
+    }
 });
 
 // Track usage in memory (in production, use a database)
@@ -32,14 +40,21 @@ export default async function handler(req, res) {
     // Apply CORS
     corsMiddleware(req, res, async () => {
         if (req.method !== 'POST') {
-            return res.status(405).json({ error: 'Method not allowed' });
+            return res.status(405).json({ 
+                error: 'method_not_allowed',
+                message: 'Only POST requests are allowed'
+            });
         }
 
         // Apply short-term rate limiting
         try {
             await shortTermLimiter(req, res);
         } catch (error) {
-            return res.status(429).json({ error: 'Too many requests in 15 minutes' });
+            return res.status(429).json({
+                error: 'rate_limit_exceeded',
+                message: 'Too many requests in 15 minutes, please try again later.',
+                retryAfter: 15 * 60
+            });
         }
 
         // Apply daily rate limiting
@@ -47,15 +62,19 @@ export default async function handler(req, res) {
             await dailyLimiter(req, res);
         } catch (error) {
             return res.status(429).json({ 
-                error: 'Daily free limit reached',
-                message: 'You have reached the daily limit of 100 free requests. Please try again tomorrow.'
+                error: 'daily_limit_reached',
+                message: 'You have reached the daily limit of 100 free requests. Please try again tomorrow.',
+                retryAfter: 24 * 60 * 60
             });
         }
 
         const { origin, destination } = req.body;
         
         if (!origin || !destination) {
-            return res.status(400).json({ error: 'Missing origin or destination' });
+            return res.status(400).json({ 
+                error: 'missing_parameters',
+                message: 'Both origin and destination are required'
+            });
         }
 
         // Track usage
@@ -82,12 +101,16 @@ export default async function handler(req, res) {
                 usage: {
                     used: currentUsage + 1,
                     remaining: remainingRequests,
-                    limit: 100
+                    limit: 100,
+                    resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
                 }
             });
         } catch (error) {
             console.error('API Error:', error);
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ 
+                error: 'internal_server_error',
+                message: 'An error occurred while calculating drive time'
+            });
         }
     });
 } 

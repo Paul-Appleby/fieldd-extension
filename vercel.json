@@ -11,8 +11,5 @@
       "src": "/api/calculateDriveTime",
       "dest": "/api/calculateDriveTime.js"
     }
-  ],
-  "env": {
-    "GOOGLE_MAPS_API_KEY": "@google-maps-api-key"
-  }
+  ]
 } 

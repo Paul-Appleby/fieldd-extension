@@ -14,7 +14,7 @@ const corsMiddleware = cors({
 // Short-term rate limiting (per 15 minutes)
 const shortTermLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 50, // Increased to 50 requests per 15 minutes
+    max: 1000, // Temporarily increased for testing
     message: {
         error: 'rate_limit_exceeded',
         message: 'Too many requests in 15 minutes, please try again later.',
@@ -25,7 +25,7 @@ const shortTermLimiter = rateLimit({
 // Daily rate limiting (stays within Google's free tier)
 const dailyLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    max: 100, // Limit each IP to 100 requests per day (Google's free tier limit)
+    max: 1000, // Temporarily increased for testing
     message: {
         error: 'daily_limit_reached',
         message: 'You have reached the daily limit of 100 free requests. Please try again tomorrow.',
@@ -46,7 +46,8 @@ export default async function handler(req, res) {
             });
         }
 
-        // Apply short-term rate limiting
+        // Temporarily skip rate limiting for testing
+        /*
         try {
             await shortTermLimiter(req, res);
         } catch (error) {
@@ -57,7 +58,6 @@ export default async function handler(req, res) {
             });
         }
 
-        // Apply daily rate limiting
         try {
             await dailyLimiter(req, res);
         } catch (error) {
@@ -67,6 +67,7 @@ export default async function handler(req, res) {
                 retryAfter: 24 * 60 * 60
             });
         }
+        */
 
         const { origin, destination } = req.body;
         

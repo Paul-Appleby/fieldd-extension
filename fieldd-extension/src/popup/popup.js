@@ -5,9 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearButton = document.getElementById('clearDriveTimes');
     const resultDiv = document.getElementById('result');
     
-    // API Keys
-    const MAPS_API_KEY = "AIzaSyDwm7B0m670xvfhaw4vcodel04pNIOvCJQ";
-
+    // Vercel API endpoints - using the automatically maintained domain
+    const VERCEL_API_BASE = "https://fieldd-extension-git-main-pauls-projects-8817cc1b.vercel.app";
+    
     // Initially hide the clear button
     clearButton.style.display = 'none';
 
@@ -30,31 +30,34 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const origins = [submittedAddress];
-        const MAX_ELEMENTS = 25; // Changed from 100 to 25 to ensure we don't exceed limits
+        const MAX_ELEMENTS = 25;
         const allDriveTimes = [];
         
         for (let i = 0; i < scrapedAddresses.length; i += MAX_ELEMENTS) {
             const chunk = scrapedAddresses.slice(i, i + MAX_ELEMENTS);
             
             try {
-                const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${encodeURIComponent(origins.join('|'))}&destinations=${encodeURIComponent(chunk.join('|'))}&key=${MAPS_API_KEY}`;
-                
-                console.log("Fetching Distance Matrix API URL:", url);
-                
-                const response = await fetch(url);
-                const data = await response.json();
-                console.log('Full API Response:', data);
+                const response = await fetch(`${VERCEL_API_BASE}/api/route`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        origin: submittedAddress,
+                        destinations: chunk
+                    })
+                });
 
-                if (data.status !== 'OK') {
-                    console.error('Google API Error:', data.status, data.error_message);
-                    resultDiv.textContent = `Error: ${data.status} - ${data.error_message || 'Check API key & billing'}`;
-                    return;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                if (!data.rows || !data.rows.length || !data.rows[0].elements) {
-                    console.error('Invalid response structure:', data);
-                    resultDiv.textContent = 'Error: Unexpected API response. Check console.';
+                const data = await response.json();
+                console.log('API response data:', data);
+
+                if (data.status !== 'OK') {
+                    console.error('API Error:', data.status);
+                    resultDiv.textContent = `Error: ${data.status}`;
                     return;
                 }
 
@@ -80,8 +83,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
         displayDriveTimes(allDriveTimes);
 
-        const embedUrl = `https://www.google.com/maps/embed/v1/place?key=${MAPS_API_KEY}&q=${encodeURIComponent(submittedAddress)}&zoom=14&size=400x300`;
-        mapIframe.src = embedUrl;
+        // Get map embed URL from Vercel API
+        try {
+            const mapResponse = await fetch(`${VERCEL_API_BASE}/api/map-embed`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    address: submittedAddress
+                })
+            });
+
+            if (mapResponse.ok) {
+                const mapData = await mapResponse.json();
+                mapIframe.src = mapData.embedUrl;
+            }
+        } catch (error) {
+            console.error('Error getting map embed:', error);
+            mapIframe.style.display = 'none';
+        }
     }
 
     submitButton.addEventListener('click', function() {

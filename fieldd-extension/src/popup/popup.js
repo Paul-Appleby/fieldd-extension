@@ -46,9 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 console.log('Full API Response:', data);
 
-                if (data.status === 'ERROR') {
-                    console.error('API Error:', data.error, data.details);
-                    resultDiv.textContent = `Error: ${data.error}${data.details ? ` - ${data.details}` : ''}`;
+                if (data.status !== 'OK') {
+                    console.error('Google API Error:', data.status, data.error_message);
+                    resultDiv.textContent = `Error: ${data.status} - ${data.error_message || 'Check API key & billing'}`;
                     return;
                 }
 

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle -->
+    <circle cx="64" cy="64" r="60" fill="#4285f4"/>
+    
+    <!-- Car Body -->
+    <path d="M30 80 L98 80 L98 70 L90 60 L38 60 L30 70 Z" fill="white"/>
+    
+    <!-- Car Windows -->
+    <path d="M40 70 L88 70 L88 60 L40 60 Z" fill="#4285f4"/>
+    
+    <!-- Wheels -->
+    <circle cx="40" cy="80" r="8" fill="#333"/>
+    <circle cx="88" cy="80" r="8" fill="#333"/>
+    
+    <!-- Clock Hands -->
+    <line x1="64" y1="64" x2="64" y2="40" stroke="white" stroke-width="4"/>
+    <line x1="64" y1="64" x2="84" y2="64" stroke="white" stroke-width="4"/>
+</svg> 

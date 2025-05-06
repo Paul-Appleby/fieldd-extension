@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Fieldd Extension",
+  "version": "1.0",
+  "description": "Enhance your Fieldd experience with drive times and weather information",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.fieldd.com/*"],
+      "js": ["src/content.js"],
+      "css": ["src/styles/indicators.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "host_permissions": [
+    "https://maps.googleapis.com/*",
+    "https://*.vercel.app/*"
+  ],
+  "content_security_policy": {
+    "script-src": "'self' https://maps.googleapis.com https://*.vercel.app;",
+    "object-src": "'self'"
+  }
+}

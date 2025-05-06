@@ -1,0 +1,11 @@
+{
+  "name": "fieldd-extension",
+  "version": "1.0.0",
+  "description": "Fieldd Chrome Extension for drive times and weather information",
+  "scripts": {
+    "build": "node convert_icons.js"
+  },
+  "dependencies": {
+    "sharp": "^0.33.2"
+  }
+} 

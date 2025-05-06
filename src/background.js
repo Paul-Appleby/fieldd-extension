@@ -1,6 +1,9 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log('Background script received message:', request);
+    
     if (request.action === 'calculateDriveTime') {
-        const API_ENDPOINT = "https://your-project.vercel.app/api/calculateDriveTime";
+        const API_ENDPOINT = "https://fieldd-extension-git-main-pauls-projects-8817cc1b.vercel.app/api/calculateDriveTime";
+        console.log('Making API call to:', API_ENDPOINT);
         
         fetch(API_ENDPOINT, {
             method: 'POST',
@@ -12,14 +15,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 destination: request.destination
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('API response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('API response data:', data);
             sendResponse({
                 success: true,
                 data: data
             });
         })
         .catch(error => {
+            console.error('API call failed:', error);
             sendResponse({
                 success: false,
                 error: error.message
@@ -29,6 +40,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; // Required for async response
     }
     if (request.action === 'ping') {
+        console.log('Ping received');
         sendResponse({ success: true });
         return true;
     }

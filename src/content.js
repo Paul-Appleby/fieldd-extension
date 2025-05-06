@@ -287,14 +287,18 @@ function setupJobClickHandlers() {
 }
 
 function handleJobSelection(element, address) {
+    console.log('Job selection started:', { address });
+    
     // Check if job is already selected
     const isAlreadySelected = selectedJobs.some(job => job.address === address);
     if (isAlreadySelected) {
+        console.log('Job already selected, ignoring');
         return;
     }
 
     // Reset if we already have 2 selections
     if (selectedJobs.length === MAX_SELECTIONS) {
+        console.log('Max selections reached, resetting');
         selectedJobs = [];
         removeAllHighlights();
     }
@@ -302,7 +306,7 @@ function handleJobSelection(element, address) {
     // Get the full job title to extract client name
     const fullText = element.textContent.trim();
     const clientName = extractClientName(fullText);
-    console.log('Selected job:', { address, clientName }); // Debug log
+    console.log('Selected job:', { address, clientName });
 
     // Add new selection
     selectedJobs.push({ 
@@ -312,9 +316,11 @@ function handleJobSelection(element, address) {
     });
     
     highlightJob(element, selectedJobs.length);
+    console.log('Current selections:', selectedJobs);
 
     // Only calculate drive time when we have exactly 2 jobs
     if (selectedJobs.length === 2) {
+        console.log('Two jobs selected, calculating drive time');
         calculateDriveTime(selectedJobs[0].address, selectedJobs[1].address);
     }
 }
@@ -392,20 +398,27 @@ function calculateDriveTime(origin, destination) {
 }
 
 function makeApiCall(origin, destination) {
+    console.log('Making API call:', { origin, destination });
     try {
         chrome.runtime.sendMessage({
             action: 'calculateDriveTime',
             origin: origin,
             destination: destination
         }, response => {
+            console.log('API response:', response);
             if (response && response.success) {
                 const data = response.data;
                 if (data.status === 'OK' && data.rows[0].elements[0].status === 'OK') {
+                    console.log('Drive time data:', data.rows[0].elements[0]);
                     displayDriveTime(
                         data.rows[0].elements[0].duration.text,
                         data.rows[0].elements[0].distance.text
                     );
+                } else {
+                    console.error('Invalid API response:', data);
                 }
+            } else {
+                console.error('API call failed:', response);
             }
         });
     } catch (error) {

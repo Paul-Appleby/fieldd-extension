@@ -2,14 +2,23 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/calculateDriveTime.js",
+      "src": "api/route.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/map-embed.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/calculateDriveTime",
-      "dest": "/api/calculateDriveTime.js"
+      "src": "/api/route",
+      "dest": "/api/route.js"
+    },
+    {
+      "src": "/api/map-embed",
+      "dest": "/api/map-embed.js"
     }
-  ]
+  ],
+  "comment": "Testing push with token"
 } 

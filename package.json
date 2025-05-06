@@ -1,20 +1,12 @@
 {
-  "name": "fieldd-extension-api",
+  "name": "fieldd-api",
   "version": "1.0.0",
-  "description": "API server for Fieldd Chrome Extension",
-  "main": "api/calculateDriveTime.js",
+  "description": "API for Fieldd Drive Time Calculator",
+  "main": "api/route.js",
   "scripts": {
-    "start": "vercel dev",
-    "deploy": "vercel deploy"
+    "start": "vercel dev"
   },
   "dependencies": {
-    "adm-zip": "^0.5.16",
-    "archiver": "^7.0.1",
-    "cors": "^2.8.5",
-    "express-rate-limit": "^6.7.0",
-    "sharp": "^0.34.1"
-  },
-  "devDependencies": {
-    "vercel": "^28.0.0"
+    "@vercel/node": "^2.15.0"
   }
 }

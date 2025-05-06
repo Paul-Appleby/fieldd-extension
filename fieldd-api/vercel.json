@@ -1,16 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/calculateDriveTime.js",
-      "use": "@vercel/node"
+  "functions": {
+    "api/calculateDriveTime.js": {
+      "memory": 1024,
+      "maxDuration": 10
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/calculateDriveTime",
-      "dest": "/api/calculateDriveTime.js",
-      "methods": ["POST", "OPTIONS"]
-    }
-  ]
+  }
 } 

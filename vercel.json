@@ -19,6 +19,5 @@
       "src": "/api/map-embed",
       "dest": "/api/map-embed.js"
     }
-  ],
-  "comment": "Testing push with token"
+  ]
 } 

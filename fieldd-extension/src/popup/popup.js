@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearButton = document.getElementById('clearDriveTimes');
     const resultDiv = document.getElementById('result');
     
-    // API Keys
-    const MAPS_API_KEY = "AIzaSyDwm7B0m670xvfhaw4vcodel04pNIOvCJQ";
+    // Update to use Vercel API
+    const VERCEL_API_URL = 'https://fieldd-api.vercel.app/api/route';
 
     // Initially hide the clear button
     clearButton.style.display = 'none';
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const chunk = scrapedAddresses.slice(i, i + MAX_ELEMENTS);
             
             try {
-                const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${encodeURIComponent(origins.join('|'))}&destinations=${encodeURIComponent(chunk.join('|'))}&key=${MAPS_API_KEY}`;
+                const url = `${VERCEL_API_URL}?addresses=${encodeURIComponent(chunk.join('|'))}`;
                 
                 console.log("Fetching Distance Matrix API URL:", url);
                 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         displayDriveTimes(allDriveTimes);
 
-        const embedUrl = `https://www.google.com/maps/embed/v1/place?key=${MAPS_API_KEY}&q=${encodeURIComponent(submittedAddress)}&zoom=14&size=400x300`;
+        const embedUrl = `${VERCEL_API_URL}/embed?address=${encodeURIComponent(submittedAddress)}`;
         mapIframe.src = embedUrl;
     }
 

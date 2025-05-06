@@ -1,73 +1,44 @@
-const { GoogleMapsAPIKey } = process.env;
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 export default async function handler(req, res) {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', 'chrome-extension://*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    // Enable CORS
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-    // Handle preflight requests
+    // Handle preflight request
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
     }
 
-    // Only allow GET requests
-    if (req.method !== 'GET') {
-        return res.status(405).json({ 
-            status: 'ERROR',
-            error: 'Method not allowed' 
-        });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
-        const { addresses } = req.query;
-        
-        if (!addresses) {
-            return res.status(400).json({ 
-                status: 'ERROR',
-                error: 'No addresses provided' 
-            });
+        const { origin, destination } = req.body;
+
+        if (!origin || !destination) {
+            return res.status(400).json({ error: 'Missing origin or destination' });
         }
 
-        // Split addresses and validate
-        const addressList = addresses.split('|');
-        if (addressList.length > 25) {
-            return res.status(400).json({ 
-                status: 'ERROR',
-                error: 'Too many addresses (max 25)' 
-            });
-        }
-
-        // Make request to Google Maps API
+        // Make request to Google Maps Distance Matrix API
         const response = await fetch(
-            `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${encodeURIComponent(addressList[0])}&destinations=${encodeURIComponent(addressList.join('|'))}&key=${GoogleMapsAPIKey}`
+            `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${GOOGLE_MAPS_API_KEY}`
         );
 
-        if (!response.ok) {
-            throw new Error(`Google Maps API responded with status: ${response.status}`);
-        }
-
         const data = await response.json();
-        
-        // Validate the response data
-        if (!data || !data.rows || !data.rows[0] || !data.rows[0].elements) {
-            throw new Error('Invalid response from Google Maps API');
+
+        if (data.status !== 'OK') {
+            console.error('Google Maps API Error:', data);
+            return res.status(500).json({ error: 'Error from Google Maps API' });
         }
 
-        return res.status(200).json({
-            status: 'OK',
-            rows: data.rows,
-            origin_addresses: data.origin_addresses,
-            destination_addresses: data.destination_addresses
-        });
-
+        return res.status(200).json(data);
     } catch (error) {
-        console.error('API Error:', error);
-        return res.status(500).json({ 
-            status: 'ERROR',
-            error: 'Failed to calculate drive times',
-            details: error.message
-        });
+        console.error('Error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 } 

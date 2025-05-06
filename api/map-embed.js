@@ -17,4 +17,4 @@ module.exports = async (req, res) => {
     console.error('Error generating map embed:', error);
     res.status(500).json({ error: 'Failed to generate map embed' });
   }
-}; 
+}; z

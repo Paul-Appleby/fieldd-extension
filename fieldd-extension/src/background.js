@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Background script received message:', request);
     
     if (request.action === 'calculateDriveTime') {
-        const API_ENDPOINT = "https://fieldd-api.vercel.app/api/route";
+        const API_ENDPOINT = "https://fieldd-api.vercel.app/api/calculateDriveTime";
         console.log('Making API call to:', API_ENDPOINT);
         
         fetch(API_ENDPOINT, {

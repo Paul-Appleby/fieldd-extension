@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/route.js",
+      "src": "api/calculateDriveTime.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/route",
-      "dest": "/api/route.js"
+      "src": "/api/calculateDriveTime",
+      "dest": "/api/calculateDriveTime.js"
     }
   ]
 } 

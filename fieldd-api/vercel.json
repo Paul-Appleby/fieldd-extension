@@ -8,7 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/api/calculateDriveTime",
+      "src": "/(.*)",
       "dest": "/api/calculateDriveTime.js"
     }
   ]

@@ -85,27 +85,31 @@ function appendDriveTimes(driveTimes) {
     });
 }
 
-// Weather functionality temporarily disabled
-const weatherData = new Map(); // Keep the map but we won't use it
+// Add this to your existing content.js
+const weatherData = new Map(); // Store weather data for each address
 
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Content script received a message:', request);
     try {
-        if (request.action === 'scrapeAddresses') {
-            const addresses = scrapeAddresses();
-            sendResponse({ addresses: addresses });
+    if (request.action === 'scrapeAddresses') {
+        const addresses = scrapeAddresses();
+        sendResponse({ addresses: addresses });
         } else if (request.action === 'appendDriveTimes') {
             appendDriveTimes(request.driveTimes);
             sendResponse({ success: true });
         } else if (request.action === 'updateWeather') {
-            // Weather functionality temporarily disabled
-            console.log('Weather functionality is temporarily disabled');
-            sendResponse({ success: false, message: 'Weather functionality is temporarily disabled' });
+            if (request.weather && request.address) {
+                weatherData.set(request.address, request.weather);
+                updateWeatherDisplay(request.address);
+                sendResponse({ success: true });
+            } else {
+                console.error('Invalid weather data received:', request);
+                sendResponse({ error: 'Invalid weather data' });
+            }
         } else if (request.action === 'toggleWeather') {
-            // Weather functionality temporarily disabled
-            console.log('Weather functionality is temporarily disabled');
-            sendResponse({ success: false, message: 'Weather functionality is temporarily disabled' });
+            toggleWeatherDisplay(request.enabled);
+            sendResponse({ success: true });
         } else if (request.action === 'clearDriveTimes') {
             clearAllDriveTimes();
             sendResponse({ success: true });
@@ -117,20 +121,143 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
 });
 
-// Weather functions temporarily disabled
 function updateWeatherDisplay(address) {
-    console.log('Weather functionality is temporarily disabled');
+    document.querySelectorAll('.fc-event-title.fc-sticky').forEach(element => {
+        const fullText = element.textContent.trim();
+        const addressMatch = fullText.match(/\$[^-]*- (.*)$/);
+        
+        if (addressMatch && addressMatch[1].trim() === address) {
+            const weather = weatherData.get(address);
+            if (weather && weather.condition) { // Check if weather data exists and has required properties
+                let weatherElement = element.parentElement.querySelector('.weather-indicator');
+                
+                if (!weatherElement) {
+                    weatherElement = document.createElement('div');
+                    weatherElement.className = 'weather-indicator';
+                    element.parentElement.appendChild(weatherElement);
+                }
+
+                try {
+                    weatherElement.innerHTML = `
+                        ${weather.icon || '🌤️'}
+                        <div class="weather-tooltip">
+                            ${weather.condition || 'N/A'}<br>
+                            ${weather.temp ? weather.temp + '°F' : 'N/A'}<br>
+                            ${weather.description || 'Weather data unavailable'}
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Error updating weather display:', error);
+                    weatherElement.innerHTML = `
+                        🌤️
+                        <div class="weather-tooltip">
+                            Weather data unavailable
+                        </div>
+                    `;
+                }
+            } else {
+                console.warn(`Invalid or missing weather data for address: ${address}`);
+            }
+        }
+    });
 }
 
 function toggleWeatherDisplay(enabled) {
-    console.log('Weather functionality is temporarily disabled');
+    const indicators = document.querySelectorAll('.weather-indicator');
+    indicators.forEach(indicator => {
+        indicator.style.display = enabled ? 'block' : 'none';
+    });
 }
 
-// Remove weather styles
+// Replace both styleSheet declarations with this combined version
 const combinedStyles = `
-    /* Weather functionality temporarily disabled */
+    /* Weather styles */
     .weather-indicator {
-        display: none !important;
+        position: absolute;
+        right: -25px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2em;
+        animation: float 3s ease-in-out infinite;
+        z-index: 10000;
+        cursor: pointer;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(-50%) translateX(0px); }
+        50% { transform: translateY(-50%) translateX(-5px); }
+        100% { transform: translateY(-50%) translateX(0px); }
+    }
+
+    .weather-tooltip {
+        position: absolute;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        display: none;
+        right: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-right: 10px;
+        white-space: nowrap;
+    }
+
+    .weather-indicator:hover .weather-tooltip {
+        display: block;
+    }
+
+    /* Job selection styles */
+    .fc-event-title.fc-sticky {
+        transition: outline 0.2s ease;
+        position: relative;
+    }
+    
+    .selection-number {
+        position: absolute;
+        right: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .selection-hint {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 10000;
+    }
+
+    #selection-mode-indicator {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(33, 150, 243, 0.9);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        z-index: 10000;
+        pointer-events: none;
+    }
+
+    .fc-event-title.fc-sticky:hover {
+        cursor: default;
     }
 `;
 

@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Full API Response:', data);
 
                 if (data.status !== 'OK') {
-                    console.error('Google API Error:', data.status, data.error_message);
-                    resultDiv.textContent = `Error: ${data.status} - ${data.error_message || 'Check API key & billing'}`;
+                    console.error('API Error:', data.status, data.error_message);
+                    resultDiv.textContent = `Error: ${data.status} - ${data.error_message || 'Unable to calculate drive time'}`;
                     return;
                 }
 

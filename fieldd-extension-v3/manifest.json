@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Fieldd Drive Time Calculator",
+  "version": "1.0.0",
+  "description": "Calculate drive times between jobs in Fieldd. Select two jobs to instantly see travel time and distance.",
+  "permissions": [
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://admin.fieldd.co/*"],
+      "js": ["src/content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "host_permissions": [
+    "https://maps.googleapis.com/*",
+    "https://*.vercel.app/*"
+  ],
+  "content_security_policy": {
+    "script-src": "'self' https://maps.googleapis.com https://*.vercel.app;",
+    "object-src": "'self'"
+  }
+}

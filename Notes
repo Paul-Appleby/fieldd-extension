@@ -1,0 +1,12 @@
+todo
+- rate limiting 
+- consider client usage 
+-latest wokring delpoyment: m447bgk52
+
+bugs
+- address stay appended afet clikcing off
+
+Ftuure ideas
+- address suggestion in submit bar 
+- 2+ addresses for route summary (selctor) 
+- other UI tools - for sales, glh, other crms, etc

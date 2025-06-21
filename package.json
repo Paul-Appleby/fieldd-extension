@@ -4,10 +4,12 @@
   "description": "API for Fieldd Drive Time Calculator",
   "main": "api/route.js",
   "scripts": {
-    "start": "vercel dev"
+    "start": "vercel dev",
+    "dev": "vercel dev"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.1",
     "@vercel/node": "^2.15.0",
     "axios": "^1.6.2"
   }
-} 
+}

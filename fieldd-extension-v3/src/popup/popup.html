@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css">
+    <title>Drive Times Calculator</title>
+    <script src="popup.js"></script>
+</head>
+<body>
+    <div id="popup-container">
+        <div class="address-input-container">
+            <input type="text" id="address" placeholder="Enter starting address" autocomplete="off">
+            <div id="address-suggestions" class="suggestions-container"></div>
+        </div>
+        <div class="button-container">
+            <button id="submit">Calculate Drive Times</button>
+            <button id="clearDriveTimes">Clear All Times</button>
+            <button id="weatherToggle" style="display: none;">🌤️ Weather</button>
+        </div>
+        <div id="result"></div>
+    </div>
+</body>
+</html>

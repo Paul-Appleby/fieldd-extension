@@ -18,35 +18,50 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { origin, destination } = req.body;
+    const { origin, destinations } = req.body;
     
-    if (!origin || !destination) {
-      return res.status(400).json({ error: 'Origin and destination are required' });
+    // Handle both single destination and array of destinations
+    const destinationsArray = Array.isArray(destinations) ? destinations : [destinations];
+    
+    if (!origin || !destinationsArray.length) {
+      return res.status(400).json({ error: 'Origin and at least one destination are required' });
     }
 
+    // Build destinations string for API
+    const destinationsStr = destinationsArray.map(dest => encodeURIComponent(dest)).join('|');
+
+    console.log('Making Distance Matrix API call for:', {
+      origin,
+      destinationsCount: destinationsArray.length
+    });
+
     const response = await axios.get(
-      `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&key=${process.env.GOOGLE_MAPS_API_KEY}`
+      `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${destinationsStr}&units=imperial&key=${process.env.GOOGLE_MAPS_API_KEY}`
     );
 
     if (response.data.status !== 'OK') {
-      return res.status(400).json({ error: 'Could not calculate route' });
+      console.error('Distance Matrix API error:', response.data);
+      return res.status(400).json({ error: 'Could not calculate distances' });
     }
 
-    const route = response.data.routes[0];
-    const duration = route.legs[0].duration.text;
-    const distance = route.legs[0].distance.text;
+    // Process results
+    const results = response.data.rows[0].elements.map((element, index) => {
+      if (element.status === 'OK') {
+        return {
+          address: destinationsArray[index],
+          duration: element.duration.text,
+          distance: element.distance.text
+        };
+      }
+      console.warn(`Failed to calculate distance for ${destinationsArray[index]}: ${element.status}`);
+      return null;
+    }).filter(result => result !== null);
 
-    res.status(200).json({
-      duration,
-      distance,
-      steps: route.legs[0].steps.map(step => ({
-        instruction: step.html_instructions,
-        distance: step.distance.text,
-        duration: step.duration.text
-      }))
-    });
+    console.log(`Successfully calculated ${results.length} out of ${destinationsArray.length} distances`);
+
+    res.status(200).json({ results });
   } catch (error) {
-    console.error('Error calculating route:', error);
-    res.status(500).json({ error: 'Failed to calculate route' });
+    console.error('Error calculating distances:', error);
+    res.status(500).json({ error: 'Failed to calculate distances' });
   }
 }; 
